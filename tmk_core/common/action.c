@@ -263,6 +263,12 @@ static void bilateral_combinations_hold(action_t action, keyevent_t event) {
 static void bilateral_combinations_release(uint8_t code) {
     dprint("BILATERAL_COMBINATIONS: release\n");
     if (bilateral_combinations.active && (code == bilateral_combinations.code)) {
+        if (bilateral_combinations.mods & MOD_MASK_GUI) {
+          // Send a single tap of the GUI modifiers to the computer which we
+          // suppressed earlier, before calling bilateral_combinations_hold().
+          register_mods(bilateral_combinations.mods);
+          unregister_mods(bilateral_combinations.mods);
+        }
         bilateral_combinations.active = false;
     }
 }
@@ -433,10 +439,23 @@ void process_action(keyrecord_t *record, action_t action) {
                             }
                         } else {
                             dprint("MODS_TAP: No tap: add_mods\n");
-                            register_mods(mods);
 #    ifdef BILATERAL_COMBINATIONS
+                            if (mods & MOD_MASK_GUI) {
+                              // Don't send GUI modifiers to the computer yet!
+                              // Instead, we'll just set them internally for
+                              // bilateral_combinations_hold() to send later.
+                              add_mods(mods);
+                            }
+                            else {
+                              // Send non-GUI modifiers to the computer so
+                              // that mouse clicks with Shift/Ctrl/Alt work.
+                              register_mods(mods);
+                            }
+
                             // mod-tap hold
                             bilateral_combinations_hold(action, event);
+#    else
+                            register_mods(mods);
 #    endif
                         }
                     } else {
