@@ -497,6 +497,12 @@ To delay the registration of modifiers (such as `KC_LGUI` and `KC_RGUI`, which a
 DEFERRED_EXEC_ENABLE = yes
 ```
 
+To enable *crossover* bilateral combinations (which start on one side of the keyboard and cross over to the other side, such as `RSFT_T(KC_J)` and `LGUI_T(KC_A)` in the word "jam"), add the following line to your `config.h` and define a value: hold times greater than that value will permit crossover bilateral combinations.  For example, if you typed `RSFT_T(KC_J)` and `LGUI_T(KC_A)` faster than the defined value, the keys `KC_J` and `KC_A` would be sent to the computer.  In contrast, if you typed slower than the defined value, the keys `RSFT(KC_A)` would be sent to the computer.
+
+```c
+#define BILATERAL_COMBINATIONS_CROSSOVER 75
+```
+
 To monitor activations in the background, enable debugging, enable the console, enable terminal bell, add `#define DEBUG_ACTION` to `config.h`, and use something like the following shell command line:
 
 ```sh

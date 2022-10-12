@@ -55,7 +55,7 @@ int retro_tapping_counter = 0;
 #    include "process_auto_shift.h"
 #endif
 
-#if (BILATERAL_COMBINATIONS + 0)
+#if (BILATERAL_COMBINATIONS + BILATERAL_COMBINATIONS_CROSSOVER + 0)
 #    include "quantum.h"
 #endif
 
@@ -317,7 +317,7 @@ static struct {
     uint8_t tap;
     uint8_t mods;
     bool left;
-#    if (BILATERAL_COMBINATIONS + 0)
+#    if (BILATERAL_COMBINATIONS + BILATERAL_COMBINATIONS_CROSSOVER + 0)
     uint16_t time;
 #    endif
 #    if (BILATERAL_COMBINATIONS_DEFERMODS + 0)
@@ -353,7 +353,7 @@ static void bilateral_combinations_hold(action_t action, keyevent_t event) {
     bilateral_combinations.tap = action.layer_tap.code;
     bilateral_combinations.mods = (action.kind.id == ACT_LMODS_TAP) ? action.key.mods : action.key.mods << 4;
     bilateral_combinations.left = bilateral_combinations_left(event.key);
-#    if (BILATERAL_COMBINATIONS + 0)
+#    if (BILATERAL_COMBINATIONS + BILATERAL_COMBINATIONS_CROSSOVER + 0)
     bilateral_combinations.time = event.time;
 #    endif
 #    if (BILATERAL_COMBINATIONS_DEFERMODS + 0)
@@ -390,6 +390,18 @@ static void bilateral_combinations_tap(keyevent_t event) {
             unregister_mods(bilateral_combinations.mods);
             tap_code(bilateral_combinations.tap);
         }
+#    if (BILATERAL_COMBINATIONS_CROSSOVER + 0)
+        else {
+            if (TIMER_DIFF_16(event.time, bilateral_combinations.time) > BILATERAL_COMBINATIONS_CROSSOVER) {
+                dprint("BILATERAL_COMBINATIONS_CROSSOVER: timeout\n");
+                bilateral_combinations_clear();
+                return;
+            }
+            dprint("BILATERAL_COMBINATIONS_CROSSOVER: change\n");
+            unregister_mods(bilateral_combinations.mods);
+            tap_code(bilateral_combinations.tap);
+        }
+#    endif
         bilateral_combinations_clear();
     }
 }
