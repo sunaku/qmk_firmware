@@ -197,6 +197,18 @@ If `BILATERAL_COMBINATIONS` is defined to a value, hold times greater than that 
 #define BILATERAL_COMBINATIONS 500
 ```
 
+To suppress "flashing mods" such as the GUI keys (which pop up the "Start Menu" in Microsoft Windows) during bilateral combinations, add the following to your `config.h`:
+
+```c
+#define BILATERAL_COMBINATIONS_FLASHMODS MOD_MASK_GUI
+```
+
+In addition, to also suppress the Alt keys (which pop up the "Ribbon Menu" in Microsoft Office) during bilateral combinations, specify a compound mask.  For example:
+
+```c
+#define BILATERAL_COMBINATIONS_FLASHMODS (MOD_MASK_GUI|MOD_MASK_ALT)
+```
+
 To monitor activations in the background, enable debugging, enable the console, enable terminal bell, add `#define DEBUG_ACTION` to `config.h`, and use something like the following shell command line:
 
 ```sh
