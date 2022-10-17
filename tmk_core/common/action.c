@@ -282,6 +282,7 @@ static void bilateral_combinations_tap(keyevent_t event) {
 #    if (BILATERAL_COMBINATIONS + 0)
             if (TIMER_DIFF_16(event.time, bilateral_combinations.time) > BILATERAL_COMBINATIONS) {
                 dprint("BILATERAL_COMBINATIONS: timeout\n");
+                bilateral_combinations.active = false;
                 return;
             }
 #    endif
