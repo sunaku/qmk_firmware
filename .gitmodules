@@ -21,3 +21,6 @@
 [submodule "lib/pico-sdk"]
 	path = lib/pico-sdk
 	url = https://github.com/qmk/pico-sdk.git
+[submodule "keyboards/handwired/dactyl_manuform/5x6/keymaps/sunaku/getreuer"]
+	path = keyboards/handwired/dactyl_manuform/5x6_5/keymaps/sunaku/getreuer
+	url = https://github.com/getreuer/qmk-keymap
