@@ -320,6 +320,9 @@ static struct {
 #    if (BILATERAL_COMBINATIONS + 0)
     uint16_t time;
 #    endif
+#    if (BILATERAL_COMBINATIONS_DEFERMODS + 0)
+    deferred_token defermods;
+#    endif
 } bilateral_combinations = { false };
 
 static bool bilateral_combinations_left(keypos_t key) {
@@ -334,6 +337,15 @@ static bool bilateral_combinations_left(keypos_t key) {
 #    endif
 }
 
+#    if (BILATERAL_COMBINATIONS_DEFERMODS + 0)
+static uint32_t bilateral_combinations_defermods(uint32_t trigger_time, void *cb_arg) {
+    if (bilateral_combinations.active) {
+        register_mods(bilateral_combinations.mods);
+    }
+    return 0;
+}
+#    endif
+
 static void bilateral_combinations_hold(action_t action, keyevent_t event) {
     dprint("BILATERAL_COMBINATIONS: hold\n");
     bilateral_combinations.active = true;
@@ -344,20 +356,22 @@ static void bilateral_combinations_hold(action_t action, keyevent_t event) {
 #    if (BILATERAL_COMBINATIONS + 0)
     bilateral_combinations.time = event.time;
 #    endif
+#    if (BILATERAL_COMBINATIONS_DEFERMODS + 0)
+    bilateral_combinations.defermods = defer_exec(BILATERAL_COMBINATIONS_DEFERMODS, bilateral_combinations_defermods, NULL);
+#    endif
+}
+
+static void bilateral_combinations_clear(void) {
+    bilateral_combinations.active = false;
+#    if (BILATERAL_COMBINATIONS_DEFERMODS + 0)
+    cancel_deferred_exec(bilateral_combinations.defermods);
+#    endif
 }
 
 static void bilateral_combinations_release(uint8_t code) {
     dprint("BILATERAL_COMBINATIONS: release\n");
     if (bilateral_combinations.active && (code == bilateral_combinations.code)) {
-#    ifdef BILATERAL_COMBINATIONS_FLASHMODS
-        if (bilateral_combinations.mods & BILATERAL_COMBINATIONS_FLASHMODS) {
-          // Send a single tap of the modifiers that we previously suppressed
-          // in process_action() before calling bilateral_combinations_hold().
-          register_mods(bilateral_combinations.mods);
-          unregister_mods(bilateral_combinations.mods);
-        }
-#    endif
-        bilateral_combinations.active = false;
+        bilateral_combinations_clear();
     }
 }
 
@@ -368,7 +382,7 @@ static void bilateral_combinations_tap(keyevent_t event) {
 #    if (BILATERAL_COMBINATIONS + 0)
             if (TIMER_DIFF_16(event.time, bilateral_combinations.time) > BILATERAL_COMBINATIONS) {
                 dprint("BILATERAL_COMBINATIONS: timeout\n");
-                bilateral_combinations.active = false;
+                bilateral_combinations_clear();
                 return;
             }
 #    endif
@@ -376,7 +390,7 @@ static void bilateral_combinations_tap(keyevent_t event) {
             unregister_mods(bilateral_combinations.mods);
             tap_code(bilateral_combinations.tap);
         }
-        bilateral_combinations.active = false;
+        bilateral_combinations_clear();
     }
 }
 #endif
@@ -550,18 +564,8 @@ void process_action(keyrecord_t *record, action_t action) {
                             }
                         } else {
                             dprint("MODS_TAP: No tap: add_mods\n");
-#    ifdef BILATERAL_COMBINATIONS_FLASHMODS
-                            if (mods & BILATERAL_COMBINATIONS_FLASHMODS) {
-                              // Don't send these modifiers to computer yet!
-                              // Instead, we'll just set them internally for
-                              // bilateral_combinations_hold() to send later.
-                              add_mods(mods);
-                            }
-                            else {
-                              // Send these modifiers to the computer now so
-                              // that mouse clicks with these modifiers work.
-                              register_mods(mods);
-                            }
+#    if defined(BILATERAL_COMBINATIONS) && (BILATERAL_COMBINATIONS_DEFERMODS + 0)
+                            add_mods(mods);
 #    else
                             register_mods(mods);
 #    endif

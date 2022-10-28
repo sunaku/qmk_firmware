@@ -483,16 +483,18 @@ If `BILATERAL_COMBINATIONS` is defined to a value, hold times greater than that 
 #define BILATERAL_COMBINATIONS 500
 ```
 
-To suppress "flashing mods" such as the GUI keys (which pop up the "Start Menu" in Microsoft Windows) during bilateral combinations, add the following to your `config.h`:
+To delay the registration of modifiers (such as `KC_LGUI` and `KC_RGUI`, which are considered to be "flashing mods" because they suddenly "flash" or pop up the "Start Menu" in Microsoft Windows) during bilateral combinations:
+
+1. Add the following line to your `config.h` and define a timeout value (measured in milliseconds).  Hold times greater than this value will permit modifiers to be registered.
 
 ```c
-#define BILATERAL_COMBINATIONS_FLASHMODS MOD_MASK_GUI
+#define BILATERAL_COMBINATIONS_DEFERMODS 100
 ```
 
-In addition, to also suppress the Alt keys (which pop up the "Ribbon Menu" in Microsoft Office) during bilateral combinations, specify a compound mask.  For example:
+2. Add the following line to your `rules.mk` file to enable QMK's deferred execution facility, which is needed by the `BILATERAL_COMBINATIONS_DEFERMODS` setting mentioned above.
 
-```c
-#define BILATERAL_COMBINATIONS_FLASHMODS (MOD_MASK_GUI|MOD_MASK_ALT)
+```make
+DEFERRED_EXEC_ENABLE = yes
 ```
 
 To monitor activations in the background, enable debugging, enable the console, enable terminal bell, add `#define DEBUG_ACTION` to `config.h`, and use something like the following shell command line:
