@@ -25,3 +25,6 @@
 	path = lib/lvgl
 	url = https://github.com/qmk/lvgl.git
 	branch = release/v8.2
+[submodule "keyboards/ergohaven/remnant/keymaps/sunaku/getreuer"]
+	path = keyboards/ergohaven/remnant/keymaps/sunaku/getreuer
+	url = https://github.com/getreuer/qmk-keymap
