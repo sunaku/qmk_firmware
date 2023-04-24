@@ -15,6 +15,7 @@ QMK_SETTINGS = no
 # SRC += features/custom_shift_keys.c
 SRC += features/caps_word.c
 SRC += features/select_word.c
+SRC += features/custom_shift_keys.c
 
 #-----------------------------------------------------------------------------
 # sunaku
