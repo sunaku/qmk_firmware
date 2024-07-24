@@ -14,7 +14,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "quantum.h"
+#pragma once
+
+#include "keycodes.h"
 
 #ifndef VIA_ENABLE
 #    ifndef RGB_MATRIX_TOGGLE
