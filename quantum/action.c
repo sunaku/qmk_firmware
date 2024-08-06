@@ -375,8 +375,14 @@ void register_mouse(uint8_t mouse_keycode, bool pressed) {
 #    ifndef BILATERAL_COMBINATIONS_ALLOW_CROSSOVER_AFTER
 #        define BILATERAL_COMBINATIONS_ALLOW_CROSSOVER_AFTER (~0) /* infinity */
 #    endif
+#    ifndef BILATERAL_COMBINATIONS_IMMEDIATE_CROSSOVER_CHORD_SIZE_THRESHOLD
+#        define BILATERAL_COMBINATIONS_IMMEDIATE_CROSSOVER_CHORD_SIZE_THRESHOLD BILATERAL_COMBINATIONS_LIMIT_CHORD_TO_N_KEYS /* disabled */
+#    endif
 #    ifndef BILATERAL_COMBINATIONS_ALLOW_SAMESIDED_AFTER
 #        define BILATERAL_COMBINATIONS_ALLOW_SAMESIDED_AFTER (~0) /* infinity */
+#    endif
+#    ifndef BILATERAL_COMBINATIONS_IMMEDIATE_SAMESIDED_CHORD_SIZE_THRESHOLD
+#        define BILATERAL_COMBINATIONS_IMMEDIATE_SAMESIDED_CHORD_SIZE_THRESHOLD BILATERAL_COMBINATIONS_LIMIT_CHORD_TO_N_KEYS /* disabled */
 #    endif
 #    ifndef BILATERAL_COMBINATIONS_TYPING_STREAK_TIMEOUT
 #        define BILATERAL_COMBINATIONS_TYPING_STREAK_TIMEOUT 0    /* disabled */
@@ -550,10 +556,22 @@ static void bilateral_combinations_tap(keyevent_t event) {
         uint16_t threshold = 0;
 
         if (bilateral_combinations_left(event.key) == bilateral_combinations.left) {
-            threshold += BILATERAL_COMBINATIONS_ALLOW_SAMESIDED_AFTER;
+            // Allow immediate Mod activation if sameside chord count threshold is reached
+            if (bilateral_combinations.chord_size <= BILATERAL_COMBINATIONS_IMMEDIATE_SAMESIDED_CHORD_SIZE_THRESHOLD) {
+                threshold += BILATERAL_COMBINATIONS_ALLOW_SAMESIDED_AFTER;
+            } else {
+                bilateral_combinations_flush_chord_mods();
+                return; /* skip flush_chord_taps() */
+            }
         }
         else {
-            threshold += BILATERAL_COMBINATIONS_ALLOW_CROSSOVER_AFTER;
+            // Allow immediate Mod activation if crossover chord count threshold is reached
+            if (bilateral_combinations.chord_size <= BILATERAL_COMBINATIONS_IMMEDIATE_CROSSOVER_CHORD_SIZE_THRESHOLD) {
+                threshold += BILATERAL_COMBINATIONS_ALLOW_CROSSOVER_AFTER;
+            } else {
+                bilateral_combinations_flush_chord_mods();
+                return; /* skip flush_chord_taps() */
+            }
         }
 
         if (threshold > 0) {
